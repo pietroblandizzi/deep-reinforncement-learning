@@ -1,6 +1,10 @@
 [//]: # "Image References"
 
 [image1]: https://user-images.githubusercontent.com/10624937/42135619-d90f2f28-7d12-11e8-8823-82b970a54d7e.gif "Trained Agent"
+[image2]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p1_navigation/state_obs/dqn.png "DQN Agent"
+[image3]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p1_navigation/state_obs/ImprovedDqn.png "Rainbow Agent"
+
+
 
 # Project 1: Navigation
 
@@ -59,7 +63,7 @@ in the folder `state_obs` and the code to train from visual observation in the f
 It is implemented:
 
 1. Standard DQN in  the file agent.py`
-![DQN][image2]
+![DQN Agent][image2]
 
 2. Rainbow with:
 
@@ -68,6 +72,7 @@ It is implemented:
     3. PER
 
     in `agent_rainbow.py`
+![Rainbow Agent][image3]
 
 In the `model.py` the Standard NN and the Dueling architecture are implemented
 
