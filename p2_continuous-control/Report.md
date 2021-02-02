@@ -1,8 +1,8 @@
 [//]: # (Image References)
 
-[image1]: https://user-images.githubusercontent.com/10624937/43851024-320ba930-9aff-11e8-8493-ee547c6af349.gif "DDPG without noise"
-[image2]: https://user-images.githubusercontent.com/10624937/43851646-d899bf20-9b00-11e8-858c-29b5c2c94ccc.png "TD3 without noise"
-[image3]: https://user-images.githubusercontent.com/10624937/43851646-d899bf20-9b00-11e8-858c-29b5c2c94ccc.png "TD3 with noise"
+[image1]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p2_continuous-control/DDPG_no_noise.png "DDPG without noise"
+[image2]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p2_continuous-control/td3_no_noise.png "TD3 without noise"
+[image3]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p2_continuous-control/td3_noise.png "TD3 with noise"
 
 
 
@@ -126,6 +126,7 @@ There are plenty of papers and improvements one can pick.
 We could spend months tuning parameters get the best network architecture for the task.
 
 One idea is to use PER instead of a normal replay buffer.
-Another idea is to try different noises and decay of the noise
+Another idea is to try different noises and decay of the noise.
+I would also like to make d4pg working and try PPO and his advances versions
 
 
