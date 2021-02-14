@@ -18,7 +18,7 @@ device = 'cpu'
 BUFFER_SIZE = int(1e6)  # replay buffer size
 BATCH_SIZE = 128         # minibatch size
 GAMMA = 0.99            # discount factor
-TAU = 1e-3              # for soft update of target parameters
+TAU = 1e-2              # for soft update of target parameters
 
 LEARNING_STEPS = 1
 LEARN_EACH = 1
@@ -108,7 +108,7 @@ class MADDPG:
             if self.iter % LEARN_EACH == 0:
                 for _ in range(LEARNING_STEPS):
                     experiences = self.memory.sample()
-                    for i in range(self.maddpg_agent):
+                    for i in range(len(self.maddpg_agent)):
                         self.learn(experiences, GAMMA, i)
                         
 
