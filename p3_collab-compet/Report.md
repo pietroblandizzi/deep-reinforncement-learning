@@ -48,6 +48,7 @@ Batch normalization is applied on the first layer.
 Initial parameters:
 
 | Param                       | Value         |
+|-----------------------------|--------------:|
 | LR Actor                    |    1e-3       |
 | LR Critic                   |    1e-3       |
 | Batch size                  | 128           |
@@ -77,6 +78,7 @@ Not to mention i re implemented the code 3 times looking for bugs
 Finally with this configuration it learned!
 
 | Param                       | Value         |
+|-----------------------------|--------------:|
 | LR Actor                    |    5e-4       |
 | LR Critic                   |    1e-3       |
 | Batch size                  | 256           |
