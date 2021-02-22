@@ -1,9 +1,9 @@
 [//]: # (Image References)
 
 [image1]: https://user-images.githubusercontent.com/10624937/42135623-e770e354-7d12-11e8-998d-29fc74429ca2.gif "Trained Agent"
-[image2]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p2_continuous-control/DDPG_no_noise.png "DDPG 1"
-[image3]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p2_continuous-control/td3_no_noise.png "DDPG 2"
-[image4]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p2_continuous-control/td3_noise.png "TD3"
+[image2]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p3_collab-compet/DDPG_1 "DDPG 1"
+[image3]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p3_collab-compet/DDPG_2 "DDPG 2"
+[image4]: https://github.com/pietroblandizzi/deep-reinforncement-learning/blob/main/p3_collab-compet/TD3 "TD3"
 
 
 
