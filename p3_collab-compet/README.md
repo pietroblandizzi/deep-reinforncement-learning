@@ -39,7 +39,15 @@ The environment is considered solved, when the average (over 100 episodes) of th
 
 ### Instructions
 
-Follow the instructions in `Tennis.ipynb` to get started with training your own agent!  
+Follow the instructions in `Tennis.ipynb` to get started with training your own agent!
+
+In the notebook there are different agents. At the time of writing there are DDPG, TD3
+
+To train the agent you must restart the environment. Note that if you do not change the nanme of the checkpoints the training will restart using the stored trained agent if any (see checkpoints folder)
+
+To play a trained agent simply load the right agent and play.
+
+Note TD3 does not seem to learn at the moment
 
 ### (Optional) Challenge: Crawler Environment
 

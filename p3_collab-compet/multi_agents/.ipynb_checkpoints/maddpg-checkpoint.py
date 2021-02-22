@@ -15,7 +15,6 @@ device = 'cpu'
 
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
-BATCH_SIZE = 128         # minibatch size
 GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters 
 
@@ -33,7 +32,7 @@ class MADDPG:
 
     def get_actors(self):
         """get actors of all the agents in the MADDPG object"""
-        actors = [maddpg_agent.actor_local for agent in self.maddpg_agent]
+        actors = [agent.actor for agent in self.maddpg_agent]
         return actors
 
     def get_target_actors(self):
@@ -43,10 +42,24 @@ class MADDPG:
     
     def save(self, agent_ckp_prefix, critic_ckp_prefix):
         for i, agent in enumerate(self.maddpg_agent):
-            torch.save(agent.actor.state_dict(), agent_ckp_prefix +'_'+ i + '_ckpt_local.pth')                 # save local actor
-            torch.save(agent.actor_target.state_dict(), agent_ckp_prefix+'_'+ i + '_ckpt_target.pth')               # save target actor 
-            torch.save(agent.critic.state_dict(), critic_ckp_prefix+'_'+ i + '_ckpt_local.pth')               # save local critic
-            torch.save(agent.critic_target.state_dict(), critic_ckp_prefix +'_'+ i + '_ckpt_target.pth')   
+            torch.save(agent.actor.state_dict(), agent_ckp_prefix +'_'+ str(i) + '_ckpt_local.pth')                 # save local actor
+            torch.save(agent.actor_target.state_dict(), agent_ckp_prefix+'_'+ str(i) + '_ckpt_target.pth')               # save target actor 
+            torch.save(agent.critic.state_dict(), critic_ckp_prefix+'_'+ str(i) + '_ckpt_local.pth')               # save local critic
+            torch.save(agent.critic_target.state_dict(), critic_ckp_prefix +'_'+ str(i) + '_ckpt_target.pth')   
+
+    def load(self, agent_ckp_prefix, critic_ckp_prefix):
+        for i, agent in enumerate(self.maddpg_agent):
+                     
+            checkpoint_local_actor =  torch.load(agent_ckp_prefix +'_'+ str(i) + '_ckpt_local.pth')              
+            checkpoint_target_actor = torch.load(agent_ckp_prefix+'_'+ str(i) + '_ckpt_target.pth')              
+            checkpoint_local_critic = torch.load(critic_ckp_prefix+'_'+ str(i) + '_ckpt_local.pth')              
+            checkpoint_target_critic = torch.load(critic_ckp_prefix +'_'+ str(i) + '_ckpt_target.pth')  
+    
+        
+            agent.actor.load_state_dict(checkpoint_local_actor)
+            agent.actor_target.load_state_dict(checkpoint_target_actor)
+            agent.critic.load_state_dict(checkpoint_local_critic)
+            agent.critic_target.load_state_dict(checkpoint_target_critic)
 
     
     def act(self, obs_all_agents, noise=0.0):
@@ -58,13 +71,14 @@ class MADDPG:
         """get target network actions from all the agents in the MADDPG object """
         target_actions = [agent.target_act(obs) for agent, obs in zip(self.maddpg_agent, obs_all_agents)]
         return target_actions
+    
+    def reset(self):
+        for a in self.maddpg_agent:
+            a.reset()
 
     def update(self, samples, agent_number):
         """update the critics and actors of all the agents """
 
-        # need to transpose each element of the samples
-        # to flip obs[parallel_agent][agent_number] to
-        # obs[agent_number][parallel_agent]
         obs, action, reward, next_obs, done = map(transpose_to_tensor, samples) # get data
 
         # full versions of obs and actions are needed for the critics
@@ -106,13 +120,10 @@ class MADDPG:
         actor_loss = -agent.critic(obs_full, q_input).mean()
         actor_loss.backward()
         agent.actor_optimizer.step()
-
-
-    def update_targets(self):
-        """soft update targets"""
-        for agent in self.maddpg_agent:
-            soft_update(agent.actor_target, agent.actor, TAU)
-            soft_update(agent.critic_target, agent.critic, TAU)
+        
+        # ----------------------- update target networks ----------------------- #
+        agent.soft_update(agent.critic, agent.critic_target, TAU)
+        agent.soft_update(agent.actor, agent.actor_target, TAU)
             
             
             

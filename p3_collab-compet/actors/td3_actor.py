@@ -3,33 +3,25 @@ import random
 import copy
 
 from models.td3_model import Actor, Critic
-from utils.replay_buffer import ReplayBuffer
 from utils.noise import OUNoise
 
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
-BUFFER_SIZE = int(1e6)   # replay buffer size
-BATCH_SIZE = 128         # minibatch size
 GAMMA = 0.99             # discount factor
 TAU = 1e-3               # for soft update of target parameters
-LR_ACTOR = 1e-3          # learning rate of the actor 
+LR_ACTOR = 5e-4          # learning rate of the actor 
 LR_CRITIC = 1e-3         # learning rate of the critic
 WEIGHT_DECAY = 0         # L2 weight decay
-EPS_DECAY = 1e-6
 
-LEARNING_STEPS = 10
-LEARN_EACH = 20
-
-POLICY_FREQ = 2        # Delay steps to update the policy
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = "cpu"
 
 class Agent():
     """Interacts with and learns from the environment."""
     
-    def __init__(self, state_size, action_size, random_seed, policy_noise=0.2):
+    def __init__(self, state_size, action_size, random_seed, num_agents, policy_noise=0.1):
         """Initialize an Agent object.
         
         Params
@@ -42,53 +34,34 @@ class Agent():
         self.action_size = action_size
         self.seed = random.seed(random_seed)
         self.policy_noise = policy_noise
-        self.eps = 1.0
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(state_size, action_size, random_seed).to(device)
+        self.actor = Actor(state_size, action_size, random_seed).to(device)
         self.actor_target = Actor(state_size, action_size, random_seed).to(device)
-        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=LR_ACTOR)
 
         # Critic Network (w/ Target Network)
-        self.critic_local = Critic(state_size, action_size, random_seed).to(device)
-        self.critic_target = Critic(state_size, action_size, random_seed).to(device)
-        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
+        self.critic = Critic(state_size*num_agents, action_size*num_agents, random_seed).to(device)
+        self.critic_target = Critic(state_size*num_agents, action_size*num_agents, random_seed).to(device)
+        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
         # Noise process
-        self.noise = OUNoise(action_size, random_seed)
+        self.noise = OUNoise(action_size, scale=1.0, sigma=0.2)
 
-        # Replay memory
-        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
-        
-        self.total_it = 0
+    def act(self, obs, noise=0.0):
+        obs = obs.to(device)
+        action = self.actor(obs)
+        action += noise*self.noise.noise()
+        action = torch.clamp(action,-1,1)
+        return action
     
-    def step(self, state, action, reward, next_state, done, step):
-        """Save experience in replay memory, and use random sample from buffer to learn."""
-        # Save experience / reward
-        self.memory.add(state, action, reward, next_state, done)
 
-        # Learn, if enough samples are available in memory
-        if len(self.memory) > BATCH_SIZE and step % LEARN_EACH == 0:
-            for _ in range(LEARNING_STEPS):
-                experiences = self.memory.sample()
-                self.learn(experiences, GAMMA)
+    def target_act(self, obs):
+        obs = obs.to(device)
+        action = self.actor_target(obs)
+        return action
 
-    def act(self, state, add_noise=True):
-        """Returns actions for given state as per current policy."""
-        state = torch.from_numpy(state).float().to(device)
-        self.actor_local.eval()
-        with torch.no_grad():
-            action = self.actor_local(state).cpu().data.numpy()
-        self.actor_local.train()
-
-        if add_noise:
-            noise = self.noise.sample() * self.eps
-            action += noise
-            if self.eps > 0.0:
-                self.eps -= EPS_DECAY
-            
-        return np.clip(action, -1, 1)
-
+    
     def reset(self):
         self.noise.reset()
 
@@ -132,7 +105,6 @@ class Agent():
         
         # Delayed Policy Update
         if self.total_it % POLICY_FREQ == 0:
-            
             # ---------------------------- update actor ---------------------------- #
             # Compute actor loss
             actions_pred = self.actor_local(states)

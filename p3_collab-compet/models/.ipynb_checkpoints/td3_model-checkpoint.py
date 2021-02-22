@@ -4,7 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = "cpu"
 
 def hidden_init(layer):
     fan_in = layer.weight.data.size()[0]
@@ -28,10 +29,7 @@ class Actor(nn.Module):
         self.seed = torch.manual_seed(seed)
         
         self.fc1 = nn.Linear(state_size, fc1_units)
-        self.bn1 = nn.BatchNorm1d(fc1_units)
-        
         self.fc2 = nn.Linear(fc1_units, fc2_units)
-        
         self.fc3 = nn.Linear(fc2_units, action_size)
         self.reset_parameters()
 
@@ -42,7 +40,7 @@ class Actor(nn.Module):
 
     def forward(self, state):
         """Build an actor (policy) network that maps states -> actions."""
-        x = self.bn1(F.relu(self.fc1(state)))
+        x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
         return torch.tanh(self.fc3(x))
 
@@ -68,12 +66,10 @@ class Critic(nn.Module):
         
         # Stream 1
         self.s1fc1 = nn.Linear(state_size, fc1_units)
-        self.s1bn1 = nn.BatchNorm1d(fc1_units)
         self.s1fc2 = nn.Linear(fc1_units+action_size, fc2_units)
         self.s1fc3 = nn.Linear(fc2_units, 1)
         
         self.s2fc1 = nn.Linear(state_size, fc1_units)
-        self.s2bn1 = nn.BatchNorm1d(fc1_units)
         self.s2fc2 = nn.Linear(fc1_units+action_size, fc2_units)
         self.s2fc3 = nn.Linear(fc2_units, 1)
         
@@ -91,7 +87,7 @@ class Critic(nn.Module):
     def Q1(self, state, action):
         """Forward pass for the first architecture"""
         # Q1
-        xs = self.s1bn1(F.relu(self.s1fc1(state)))
+        xs = F.relu(self.s1fc1(state))
         x1 = torch.cat((xs, action), dim=1)
         x1 = F.relu(self.s1fc2(x1))
         q1 = self.s1fc3(x1)
@@ -101,7 +97,7 @@ class Critic(nn.Module):
     
     def Q2(self, state, action):
         """Forward pass for the second architecture"""
-        xs = self.s2bn1(F.relu(self.s2fc1(state)))
+        xs = F.relu(self.s2fc1(state))
         x2 = torch.cat((xs, action), dim=1)
         x2 = F.relu(self.s2fc2(x2))
         q2 = self.s2fc3(x2)
